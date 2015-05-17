@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block body %}
+	<form action="/" method="post">
+	  <div class="row">
+	    <div class="six columns">
+	      <label for="userNameInput">Your username</label>
+	      <input class="u-full-width" type="text" placeholder="pick something cool" id="userNameInput" name="user">
+	    </div>
+	    <div class="six columns">
+	      <label for="roomNameInput">Room Name</label>
+	      <input class="u-full-width" type="text" id="roomNameInput" name="room">
+	    </div>
+	  </div>
+	  <input class="button-primary" type="submit" value="Submit">
+	  {% raw xsrf_form_html() %}
+	</form>
+{% end %}
