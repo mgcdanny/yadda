@@ -51,36 +51,41 @@ class Room(tornado.web.RequestHandler):
         self.render("room.html")
 
 class ChatWS(tornado.websocket.WebSocketHandler):
-    #TODO: implennet new rooms dict structure
     #rooms is a dict with key the room name and value a set of tuples (user, wsHandler)
-    # {'room': set(('user1': wsHandler1), ('user2': wsHandler2))
+    # {'room': {'user1': wsHandler1, 'user2':wsHandler2}}
 
-    rooms = defaultdict(set)
+    rooms = defaultdict(dict)
 
     def open(self, room):
-        print("Dan Socket Opened")
-        ChatWS.rooms[room].add((self.get_secure_cookie('user'), self))
+        print("Chat Socket Opened")
+        ChatWS.rooms[room][self.get_secure_cookie('user')] = self
         print(ChatWS.rooms)
 
-
     def on_close(self):
-        ChatWS.rooms[self.path_kwargs['room']].remove((self.get_secure_cookie('user'), self))
-        print("Dan Socket Closed")
-
+        del ChatWS.rooms[self.path_kwargs['room']][self.get_secure_cookie('user')]
+        print("Chat Socket Closed")
 
     def on_message(self, msg):
         parsed = tornado.escape.json_decode(msg)
-        print(parsed)
+        parsed['user'] = self.get_secure_cookie('user').decode("utf-8")
         ChatWS.send_updates(parsed)
 
     @classmethod
     def send_updates(cls, msg):
-        for user, ws_handler in cls.rooms[msg['room']]:
+        for user, ws_handler in cls.rooms[msg['room']].items():
             try:
-                print(ws_handler)
+                msg['buddies'] = [buddy.decode("utf-8") for buddy in cls.rooms[msg['room']].keys()]
                 ws_handler.write_message(msg)
             except:
                 logging.error("Error sending message", exc_info=True)
+
+    @classmethod
+    def update_buddies_list(self, room):            
+        buddies = []
+        for user, ws_handler in cls.rooms[msg['room']]:
+            buddies.append(user)
+        return buddies
+
 
 
 def main():

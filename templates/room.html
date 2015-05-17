@@ -25,6 +25,7 @@
     <aside class="three columns">
       <div class= "clearfix" style="border: 2px solid #eee; min-height: 170px;">
         <header>Yaddas:</header>
+        <ul id='buddyList'></ul>
       </div>
     </aside>
   </div>
@@ -51,8 +52,18 @@
         console.log(msg)
         msgData = JSON.parse(msg.data)
         var newMsgElement = document.createElement("div")
-        newMsgElement.innerHTML = msgData.userId + ': ' + msgData.msgText
+        newMsgElement.innerHTML = msgData.user + ': ' + msgData.msgText
         document.getElementById("textBoard").appendChild(newMsgElement)
+        buddyList = document.getElementById("buddyList")
+        while (buddyList.firstChild) {
+          buddyList.removeChild(buddyList.firstChild);
+        }
+        for(buddy in msgData.buddies){
+          var newBuddyElement = document.createElement("li")
+          newBuddyElement.innerHTML = msgData.buddies[buddy]
+          document.getElementById("buddyList").appendChild(newBuddyElement)
+        }
+        
       },
       sendMessage: function(){
         var msg = {
